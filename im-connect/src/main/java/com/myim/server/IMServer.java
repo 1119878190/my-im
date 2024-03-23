@@ -21,8 +21,11 @@ public class IMServer {
     EventLoopGroup workerGroup;
     ServerBootstrap serverBootstrap;
 
+    private int port;
 
-    public IMServer() {
+
+    public IMServer(int port) {
+        this.port = port;
         bossGroup = new NioEventLoopGroup(BOSS_GROUP_THREAD_SIZE);
         workerGroup = new NioEventLoopGroup(WORK_GROUP_THREAD_SIZE);
         serverBootstrap = new ServerBootstrap();
@@ -41,10 +44,10 @@ public class IMServer {
         logger.info("imServer 初始化完成");
     }
 
-    public void start()  {
+    public void start() {
         try {
-            this.serverBootstrap.bind(8000).sync();
-            logger.info("imServer 启动成功port");
+            this.serverBootstrap.bind(port).sync();
+            logger.info("imServer 启动成功port:{}", port);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

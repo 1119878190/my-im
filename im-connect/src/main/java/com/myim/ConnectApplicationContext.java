@@ -14,8 +14,5 @@ public class ConnectApplicationContext {
 
     public static void main(String[] args) {
         SpringApplication.run(ConnectApplicationContext.class, args);
-
-        IMServer imServer = new IMServer();
-        imServer.start();
     }
 }
