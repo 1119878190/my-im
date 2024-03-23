@@ -220,4 +220,9 @@ public class ConvertCode {
 //        System.out.println(hexString2String(productNo));
 //    }
 
+    public static void main(String[] args) {
+        String str = "1233123123";
+        System.out.println(string2HexString(str));
+    }
+
 }

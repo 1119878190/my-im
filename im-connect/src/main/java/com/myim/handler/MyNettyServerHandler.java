@@ -1,6 +1,10 @@
 package com.myim.handler;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.myim.model.SendMessageVO;
+import com.myim.proto.Message;
+import com.myim.proto.MessagePack;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -8,14 +12,12 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,10 +51,13 @@ public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof HttpRequest) {// 如果是HTTP请求，进行HTTP操作
-            handleHttpRequest(ctx, (DefaultHttpRequest)msg);
+        if (msg instanceof HttpRequest) {// 如果是HTTP请求，进行HTTP操作，例如首次socket连接
+            handleHttpRequest(ctx, (DefaultHttpRequest) msg);
         } else if (msg instanceof WebSocketFrame) {// 如果是Websocket请求，则进行websocket操作
             handleWebSocketFrame(ctx, (WebSocketFrame) msg);
+        } else if (msg instanceof Message) { // 如果时自定义解码类型message
+            // 业务处理
+            handleMyMessage(ctx, (Message) msg);
         }
     }
 
@@ -73,7 +78,7 @@ public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
         // 如果是 websocket 握手
         if (("websocket".equals(req.headers().get("Upgrade")))) {
             WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
-                    "ws://localhost:8080/ws", null, false);
+                    "/ws", null, false);
             handshaker = wsFactory.newHandshaker(req);
             if (handshaker == null) {
                 WebSocketServerHandshakerFactory
@@ -85,10 +90,10 @@ public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
         }
         // http请求
         String uri = req.getUri();
-        Map<String,String> resMap = new HashMap<>();
-        resMap.put("method",req.getMethod().name());
-        resMap.put("uri",uri);
-        String msg = "<html><head><title>test</title></head><body>你的请求为：" + JSON.toJSONString(resMap) +"</body></html>";
+        Map<String, String> resMap = new HashMap<>();
+        resMap.put("method", req.getMethod().name());
+        resMap.put("uri", uri);
+        String msg = "<html><head><title>test</title></head><body>你的请求为：" + JSON.toJSONString(resMap) + "</body></html>";
         // 创建http响应
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
@@ -107,11 +112,39 @@ public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
      */
     private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame msg) {
         // 获取客户端传输过来的消息
-        String content = ((TextWebSocketFrame) msg).text();
-        System.out.println("websocket：：：  接受到的数据：" + content);
-        ctx.writeAndFlush(new TextWebSocketFrame("[服务器在]" + LocalDateTime.now() + "接受到消息, 消息为：" + content));
+
+        if (msg instanceof TextWebSocketFrame){
+            String content = ((TextWebSocketFrame) msg).text();
+            System.out.println("websocket：：：  接受到的数据：" + content);
+
+            SendMessageVO sendMessageVO = new SendMessageVO();
+            sendMessageVO.setSendDate(new Date());
+            sendMessageVO.setContent("服务器在" + LocalDateTime.now() + "接受到消息, 消息为：" + content);
+
+            MessagePack<SendMessageVO> objectMessagePack = new MessagePack<>();
+            objectMessagePack.setCommand(10001);
+            objectMessagePack.setData(sendMessageVO);
+
+            ctx.writeAndFlush(objectMessagePack);
+        }else if (msg instanceof CloseWebSocketFrame){
+            ctx.channel().close();
+        }
 
     }
+
+    private void handleMyMessage(ChannelHandlerContext ctx, Message msg) {
+        // 获取客户端传输过来的消息
+        String message = JSONObject.toJSONString(msg);
+        System.out.println("websocket：：：  接受到的数据：" + message);
+
+        MessagePack<Object> messagePack = new MessagePack<>();
+        messagePack.setCommand(10001);
+        String resp = "[服务器在]" + LocalDateTime.now() + "接受到消息, 消息为：" + message;
+        messagePack.setData(resp);
+        ctx.writeAndFlush(messagePack);
+
+    }
+
 
 
     private static void sendHttpResponse(ChannelHandlerContext ctx,

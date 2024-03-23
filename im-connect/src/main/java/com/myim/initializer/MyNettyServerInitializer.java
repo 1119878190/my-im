@@ -1,5 +1,7 @@
 package com.myim.initializer;
 
+import com.myim.decode.WebsocketMessageDecoder;
+import com.myim.encode.WebSocketMessageEncoder;
 import com.myim.handler.MyNettyServerHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -30,11 +32,13 @@ public class MyNettyServerInitializer extends ChannelInitializer<SocketChannel> 
          * 对于websocket来讲，都是以frames进行传输的，不同的数据类型对应的frames也不同
          */
         // 客户端连接地址为 ws://localhost:8000/ws
-//        pipeline.addLast(new WebSocketServerProtocolHandler("/ws", true));
+//        pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
         // 目前暂定 字符串编解码，后续改为自定义编解码器解决粘包拆包问题
 
         // 添加 LineBasedFrameDecoder 以解决粘包和拆包问题
-//        pipeline.addLast(new MessageDecoder());
+        pipeline.addLast(new WebSocketMessageEncoder());
+        pipeline.addLast(new WebsocketMessageDecoder());
+
 
         pipeline.addLast(new MyNettyServerHandler());
     }

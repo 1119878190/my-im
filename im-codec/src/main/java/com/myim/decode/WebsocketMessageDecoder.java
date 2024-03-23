@@ -5,7 +5,8 @@ import com.myim.proto.Message;
 import com.myim.utils.ByteBufToMessageUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * @author lx
  * @date 2023/05/01
  */
-public class MessageDecoder extends ByteToMessageDecoder {
+public class WebsocketMessageDecoder extends MessageToMessageDecoder<BinaryWebSocketFrame> {
 
 
     private static final int HEADER_LENGTH = 28;
@@ -24,12 +25,12 @@ public class MessageDecoder extends ByteToMessageDecoder {
      * 解码
      *
      * @param channelHandlerContext 通道处理程序上下文
-     * @param byteBuf               字节缓冲区
-     * @param out                  列表
+     * @param binaryWebSocketFrame  字节缓冲区
+     * @param list                  列表
      * @throws Exception 异常
      */
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext channelHandlerContext, BinaryWebSocketFrame binaryWebSocketFrame, List<Object> list) throws Exception {
         // 规定：
         //-------------------------------------------------------------------------------------------------------------------------------
         //|   4byte  |    4byte   |     4byte    |  4byte |      4byte    |       4byte   |    4byte       |   nbyte   |   nbyte
@@ -38,19 +39,16 @@ public class MessageDecoder extends ByteToMessageDecoder {
         //------------------------------------------------------------------------------------------------------------------------------
 
 
+        ByteBuf content = binaryWebSocketFrame.content();
         // 如果可读字节数小于28字节(前4x7)，说明不是一条完整的消息，直接返回
-        if (byteBuf.readableBytes() < HEADER_LENGTH) {
+        if (content.readableBytes() < HEADER_LENGTH) {
             return;
         }
-
-
-        Message message = ByteBufToMessageUtils.transition(byteBuf);
+        Message message = ByteBufToMessageUtils.transition(content);
         if (message == null) {
             return;
         }
-
-        out.add(message);
-
+        list.add(message);
 
     }
 }
