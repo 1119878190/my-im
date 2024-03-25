@@ -6,147 +6,133 @@
     <title>WebSocket Client</title>
 </head>
 <body>
-    <input type="text" id="serverAddress" placeholder="Enter WebSocket Server Address...">
-    <button onclick="connectToServer()">Connect</button>
-    <button onclick="disconnectFromServer()">Disconnect</button>
-    <br>
-    <textarea id="messageContent" rows="5" cols="50" placeholder="Enter message content..."></textarea><br>
-    <button onclick="sendMessage()">Send Message</button>
+<input type="text" id="serverAddress" placeholder="Enter WebSocket Server Address..." value="ws://localhost:8000">
+<button onclick="connectToServer()">Connect</button>
+<button onclick="disconnectFromServer()">Disconnect</button>
+<br>
+<textarea id="messageContent" rows="5" cols="50" placeholder="Enter message content..."></textarea><br>
+<button onclick="sendMessage()">Send Message</button>
 
-    <h3>Message Sending History:</h3>
-    <div id="sendingHistory" style="border: 1px solid #ccc; padding: 5px; height: 100px; overflow-y: scroll;"></div>
-    <h3>Message Receiving History:</h3>
-    <div id="receivingHistory" style="border: 1px solid #ccc; padding: 5px; height: 100px; overflow-y: scroll;"></div>
+<h3>Message Sending History:</h3>
+<div id="sendingHistory" style="border: 1px solid #ccc; padding: 5px; height: 100px; overflow-y: scroll;"></div>
+<h3>Message Receiving History:</h3>
+<div id="receivingHistory" style="border: 1px solid #ccc; padding: 5px; height: 100px; overflow-y: scroll;"></div>
 
-    <script>
-        var socket;
+<script>
+    var socket;
 
-        function connectToServer() {
-            var serverAddress = document.getElementById("serverAddress").value;
-            socket = new WebSocket(serverAddress);
-            socket.binaryType = "arraybuffer";
+    function connectToServer() {
+        var serverAddress = document.getElementById("serverAddress").value;
+        socket = new WebSocket(serverAddress);
+        socket.binaryType = "arraybuffer";
 
-            socket.addEventListener('open', function (event) {
-                console.log('WebSocket connected to server:', serverAddress);
-                alert('WebSocket connected to server');
-            });
+        socket.addEventListener('open', function (event) {
+            console.log('WebSocket connected to server:', serverAddress);
+            alert('WebSocket connected to server');
+        });
 
-            socket.addEventListener('close', function (event) {
-                console.log('WebSocket connection closed');
-                alert('WebSocket connection closed');
-            });
+        socket.addEventListener('close', function (event) {
+            console.log('WebSocket connection closed');
+            alert('WebSocket connection closed');
+        });
 
-            socket.addEventListener('error', function (event) {
-                console.error('WebSocket error:', event);
-                alert('WebSocket connection error');
-            });
+        socket.addEventListener('error', function (event) {
+            console.error('WebSocket error:', event);
+            alert('WebSocket connection error');
+        });
 
-            socket.addEventListener('message', function (event) {
-                var messageData = event.data;
-                console.log('Received message from server:', messageData);
-                parseMessageData(messageData);
-            });
+        socket.addEventListener('message', function (event) {
+            var messageData = event.data;
+            console.log('Received message from server:', messageData);
+            parseMessageData(messageData);
+        });
+    }
+
+    function disconnectFromServer() {
+        if (!socket) {
+            console.error('WebSocket is not connected.');
+            alert('WebSocket is not connected');
+            return;
         }
 
-        function disconnectFromServer() {
-            if (!socket) {
-                console.error('WebSocket is not connected.');
-                alert('WebSocket is not connected');
-                return;
-            }
+        socket.close();
+    }
 
-            socket.close();
+    function sendMessage() {
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket is not connected.');
+            alert('WebSocket is not connected');
+            return;
         }
 
-        function sendMessage() {
-            if (!socket || socket.readyState !== WebSocket.OPEN) {
-                console.error('WebSocket is not connected.');
-                alert('WebSocket is not connected');
-                return;
-            }
+        var content = document.getElementById("messageContent").value;
+        // 构建消息体
+        var command = 1; // 示例命令
+        var version = 1; // 示例版本
+        var clientType = 1; // 示例客户端类型
+        var appId = 1; // 示例应用ID
+        var messageType = 1; // 示例消息类型
+        var imei = "abc"; // 默认的 IMEI 号
+        var imeiLength = imei.length; // IMEI 长度
+        var contentBytes = new TextEncoder().encode(content); // 使用 UTF-8 编码转换内容为字节数组
+        var contentLength = contentBytes.length; // 内容长度
+        // 将各字段转换为4字节的网络字节序表示
+        var commandBytes = intToBytes(command);
+        var versionBytes = intToBytes(version);
+        var clientTypeBytes = intToBytes(clientType);
+        var appIdBytes = intToBytes(appId);
+        var messageTypeBytes = intToBytes(messageType);
+        var imeiLengthBytes = intToBytes(imeiLength);
+        var contentLengthBytes = intToBytes(contentLength);
+        // 将消息发送给服务器
+        var message = commandBytes.concat(versionBytes, clientTypeBytes, appIdBytes, messageTypeBytes, imeiLengthBytes, contentLengthBytes);
+        var imeiBytes = new TextEncoder().encode(imei); // 使用 UTF-8 编码转换 IMEI 为字节数组
+        var fullMessage = new Uint8Array(message.concat(Array.from(imeiBytes), Array.from(contentBytes)));
+        socket.send(fullMessage);
+        addMessageToSendingHistory(content, fullMessage);
+    }
 
-            var content = document.getElementById("messageContent").value;
-            // 构建消息体
-            var command = 1; // 示例命令
-            var version = 1; // 示例版本
-            var clientType = 1; // 示例客户端类型
-            var appId = 1; // 示例应用ID
-            var messageType = 1; // 示例消息类型
-            var imeiLength = 0; // 示例IMEI长度
-            var contentLength = content.length; // 内容长度
-            // 将各字段转换为4字节的网络字节序表示
-            var commandBytes = intToBytes(command);
-            var versionBytes = intToBytes(version);
-            var clientTypeBytes = intToBytes(clientType);
-            var appIdBytes = intToBytes(appId);
-            var messageTypeBytes = intToBytes(messageType);
-            var imeiLengthBytes = intToBytes(imeiLength);
-            var contentLengthBytes = intToBytes(contentLength);
-            // 将消息发送给服务器
-            var message = commandBytes.concat(versionBytes, clientTypeBytes, appIdBytes, messageTypeBytes, imeiLengthBytes, contentLengthBytes);
-            var messageContent = new TextEncoder().encode(content);
-            var fullMessage = new Uint8Array(message.concat(Array.from(messageContent)));
-            socket.send(fullMessage);
-            addMessageToSendingHistory(fullMessage);
-        }
+    function intToBytes(intValue) {
+        return [
+            intValue >> 24 & 0xFF,
+            intValue >> 16 & 0xFF,
+            intValue >> 8 & 0xFF,
+            intValue & 0xFF
+        ];
+    }
 
-        function intToBytes(intValue) {
-            return [
-                intValue >> 24 & 0xFF,
-                intValue >> 16 & 0xFF,
-                intValue >> 8 & 0xFF,
-                intValue & 0xFF
-            ];
-        }
+    function parseMessageData(messageData) {
+        // 解析服务器发送的消息
+        var dataView = new DataView(messageData);
+        var command = dataView.getInt32(0);
+        var contentLength = dataView.getInt32(4);
 
-        function parseMessageData(messageData) {
-            // var dataView = new DataView(messageData);
-            // var command = dataView.getInt32(0);
-            // var contentLength = dataView.getInt32(4);
-            // var contentBytes = new Uint8Array(messageData.slice(8));
-            // var content = new TextDecoder().decode(contentBytes);
+        // 提取内容
+        var contentBytes = new Uint8Array(messageData.slice(8));
+        var content = new TextDecoder('utf-8').decode(contentBytes); // 使用 UTF-8 格式解码
 
-            // var message = {
-            //     command: command,
-            //     content: content
-            // };
+        // 显示解析后的消息
+        var message = {
+            command: command,
+            contentLength: contentLength,
+            content: content
+        };
+        console.log('Parsed message:', message);
+        addMessageToReceivingHistory(JSON.stringify(message));
+    }
 
-            // console.log('Parsed message:', message);
-            // addMessageToReceivingHistory(JSON.stringify(message));
+    function addMessageToSendingHistory(plainText, encryptedMessage) {
+        var sendingHistoryDiv = document.getElementById("sendingHistory");
+        sendingHistoryDiv.innerHTML += "<p>Sent (Plain Text): " + plainText + "</p>";
+        sendingHistoryDiv.innerHTML += "<p>Sent (Encrypted Message): " + encryptedMessage + "</p>";
+        sendingHistoryDiv.scrollTop = sendingHistoryDiv.scrollHeight;
+    }
 
-            // 解析服务器发送的消息
-            var dataView = new DataView(messageData);
-            var command = dataView.getInt32(0);
-            var contentLength = dataView.getInt32(4);
-
-            // 提取内容
-            var contentBytes = new Uint8Array(messageData.slice(8));
-            var content = new TextDecoder().decode(contentBytes);
-
-            // 显示解析后的消息
-            var message = {
-                command: command,
-                contentLength: contentLength,
-                content: content
-            };
-            console.log('Parsed message:', message);
-            addMessageToReceivingHistory(JSON.stringify(message));
-        
-
-        }
-    
-
-        function addMessageToSendingHistory(message) {
-            var sendingHistoryDiv = document.getElementById("sendingHistory");
-            sendingHistoryDiv.innerHTML += "<p>Sent: " + message + "</p>";
-            sendingHistoryDiv.scrollTop = sendingHistoryDiv.scrollHeight;
-        }
-
-        function addMessageToReceivingHistory(message) {
-            var receivingHistoryDiv = document.getElementById("receivingHistory");
-            receivingHistoryDiv.innerHTML += "<p>Received: " + message + "</p>";
-            receivingHistoryDiv.scrollTop = receivingHistoryDiv.scrollHeight;
-        }
-    </script>
+    function addMessageToReceivingHistory(message) {
+        var receivingHistoryDiv = document.getElementById("receivingHistory");
+        receivingHistoryDiv.innerHTML += "<p>Received: " + message + "</p>";
+        receivingHistoryDiv.scrollTop = receivingHistoryDiv.scrollHeight;
+    }
+</script>
 </body>
 </html>

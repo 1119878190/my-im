@@ -1,5 +1,9 @@
 package com.myim.utils;
 
+import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 public class ConvertCode {
     /**
      * @param b 字节数组

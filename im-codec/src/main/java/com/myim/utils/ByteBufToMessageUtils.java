@@ -7,6 +7,9 @@ import com.myim.proto.Message;
 import com.myim.proto.MessageHeader;
 import io.netty.buffer.ByteBuf;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
  * 字节转消息实体工具类
  *
@@ -87,8 +90,8 @@ public class ByteBufToMessageUtils {
         Message message = new Message();
         message.setMessageHeader(messageHeader);
 
-        if (messageType == 0x0) {
-            String body = new String(bodyData);
+        if (messageType == 1) {
+            String body = new String(bodyData, StandardCharsets.UTF_8);
             JSONObject parse = (JSONObject) JSONObject.parse(body);
             message.setMessagePack(parse);
         }
