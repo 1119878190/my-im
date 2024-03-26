@@ -17,11 +17,11 @@ import java.nio.charset.StandardCharsets;
  * @date 2023/05/01
  * @description: 将ByteBuf转化为Message实体，根据私有协议转换
  * 私有协议规则，
- * 4位表示Command表示消息的开始，
- * 4位表示version
- * 4位表示clientType
- * 4位表示messageType
- * 4位表示appId
+ * 4位表示Command表示消息的指令，
+ * 4位表示version 版本号
+ * 4位表示clientType 客户端访问我们的IM系统是通过WEb端，还是IOS，或者是Android端
+ * 4位表示messageType 将客户端发送的数据解析成哪种格式，比如JSON，Protobuf，还是Xml格式
+ * 4位表示appId  每个IM服务都有一个自定义唯一的appId
  * 4位表示imei长度
  * imei
  * 4位表示数据长度
@@ -51,7 +51,7 @@ public class ByteBufToMessageUtils {
         /** 获取clientType*/
         int clientType = in.readInt();
 
-        /** 获取clientType*/
+        /** 获取messageType 将客户端发送的数据解析成哪种格式，比如JSON，Protobuf，还是Xml格式*/
         int messageType = in.readInt();
 
         /** 获取appId*/
@@ -91,9 +91,14 @@ public class ByteBufToMessageUtils {
         message.setMessageHeader(messageHeader);
 
         if (messageType == 1) {
+            // 解析为json格式
             String body = new String(bodyData, StandardCharsets.UTF_8);
             JSONObject parse = (JSONObject) JSONObject.parse(body);
             message.setMessagePack(parse);
+        }else if(messageType == 2) {
+            //解析成Protobuf
+        }else if(messageType == 3) {
+            //解析成Xml
         }
 
         // 标记读索引
