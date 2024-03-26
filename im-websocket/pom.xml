@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>im-connect</artifactId>
+    <artifactId>im-websocket</artifactId>
 
     <packaging>jar</packaging>
 

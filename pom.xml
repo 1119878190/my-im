@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>im-connect</module>
+        <module>im-websocket</module>
         <module>im-common</module>
         <module>im-codec</module>
     </modules>
