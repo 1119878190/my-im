@@ -13,6 +13,7 @@
         <module>im-common</module>
         <module>im-codec</module>
         <module>im-business</module>
+        <module>im-lbs</module>
     </modules>
 
     <properties>
