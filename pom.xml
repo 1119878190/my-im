@@ -12,6 +12,7 @@
         <module>im-websocket</module>
         <module>im-common</module>
         <module>im-codec</module>
+        <module>im-business</module>
     </modules>
 
     <properties>
