@@ -54,7 +54,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.4.5</version>
+                <version>2.3.10.RELEASE</version>
                 <executions>
                     <execution>
                         <goals>
@@ -62,26 +62,26 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <mainClass>com.myim.ConnectApplicationContext</mainClass>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
+<!--                <configuration>-->
+<!--                    <mainClass>com.myim.ConnectApplicationContext</mainClass>-->
+<!--                    <excludes>-->
+<!--                        <exclude>-->
+<!--                            <groupId>org.projectlombok</groupId>-->
+<!--                            <artifactId>lombok</artifactId>-->
+<!--                        </exclude>-->
+<!--                    </excludes>-->
+<!--                </configuration>-->
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration> <!--以下分别是排除源文件目录，资源文件， 资源文件目录 -->
-                    <excludes>
-                        <exclude>/banner.txt</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-jar-plugin</artifactId>-->
+<!--                <version>3.0.2</version>-->
+<!--                <configuration> &lt;!&ndash;以下分别是排除源文件目录，资源文件， 资源文件目录 &ndash;&gt;-->
+<!--                    <excludes>-->
+<!--                        <exclude>/banner.txt</exclude>-->
+<!--                    </excludes>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
