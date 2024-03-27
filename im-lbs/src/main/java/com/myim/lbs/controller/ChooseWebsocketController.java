@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2024/03/26
  */
 @RestController
-@RequestMapping("/lbs/choose")
+@RequestMapping("/im-lbs/choose")
 public class ChooseWebsocketController {
 
 

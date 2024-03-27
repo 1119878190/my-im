@@ -14,6 +14,7 @@
         <module>im-codec</module>
         <module>im-business</module>
         <module>im-lbs</module>
+        <module>im-gateway</module>
     </modules>
 
     <properties>
