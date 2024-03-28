@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -40,8 +41,13 @@ public class RandomWebsocketLBSImpl implements ImWebsocketLBS {
             Random random = new Random();
             int i = random.nextInt(allInstances.size());
             Instance instance = allInstances.get(i);
+
+            // 取出nacos注册元数据
+            Map<String, String> metadata = instance.getMetadata();
+            String portStr = metadata.get("websocketPort");
+
             String ip = instance.getIp();
-            int port = instance.getPort();
+            int port = Integer.parseInt(portStr);
 
             return new ChooseWebsocketVO(ip, port);
 
