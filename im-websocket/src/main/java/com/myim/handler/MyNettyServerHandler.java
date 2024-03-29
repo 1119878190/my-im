@@ -2,9 +2,13 @@ package com.myim.handler;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.myim.common.enums.CommandEnum;
+import com.myim.factory.MessageHandlerServiceFactory;
 import com.myim.model.SendMessageVO;
 import com.myim.proto.Message;
+import com.myim.proto.MessageHeader;
 import com.myim.proto.MessagePack;
+import com.myim.server.MessageHandlerService;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -20,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
@@ -113,7 +118,7 @@ public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
     private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame msg) {
         // 获取客户端传输过来的消息
 
-        if (msg instanceof TextWebSocketFrame){
+        if (msg instanceof TextWebSocketFrame) {
             String content = ((TextWebSocketFrame) msg).text();
             System.out.println("websocket：：：  接受到的数据：" + content);
 
@@ -126,7 +131,7 @@ public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
             objectMessagePack.setData(sendMessageVO);
 
             ctx.writeAndFlush(objectMessagePack);
-        }else if (msg instanceof CloseWebSocketFrame){
+        } else if (msg instanceof CloseWebSocketFrame) {
             ctx.channel().close();
         }
 
@@ -134,17 +139,30 @@ public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
     private void handleMyMessage(ChannelHandlerContext ctx, Message msg) {
         // 获取客户端传输过来的消息
-        String message = JSONObject.toJSONString(msg);
-        System.out.println("websocket：：：  接受到的数据：" + message);
 
-        MessagePack<Object> messagePack = new MessagePack<>();
-        messagePack.setCommand(10001);
-        String resp = "[服务器在]" + LocalDateTime.now() + "接受到消息, 消息为：" + message;
-        messagePack.setData(resp);
-        ctx.writeAndFlush(messagePack);
+        MessageHeader messageHeader = msg.getMessageHeader();
+        Integer command = messageHeader.getCommand();
+
+        CommandEnum commandEnum = CommandEnum.of(command);
+        if (Objects.isNull(commandEnum)) {
+            // 返回错误信息
+            String message = JSONObject.toJSONString(msg);
+            System.out.println("websocket：：：  接受到的数据：" + message);
+
+            MessagePack<Object> messagePack = new MessagePack<>();
+            messagePack.setCommand(10001);
+            String resp = "[服务器在]" + LocalDateTime.now() + "接受到消息, 消息为：" + message;
+            messagePack.setData(resp);
+            ctx.writeAndFlush(messagePack);
+        }
+
+        // 获取消息处理类
+        MessageHandlerServiceFactory factory = new MessageHandlerServiceFactory();
+        MessageHandlerService messageHandler = factory.getMessageHandler(commandEnum);
+        messageHandler.messageReceiveHandler(ctx, msg);
+
 
     }
-
 
 
     private static void sendHttpResponse(ChannelHandlerContext ctx,
