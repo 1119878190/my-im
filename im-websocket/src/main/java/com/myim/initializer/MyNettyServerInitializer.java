@@ -33,7 +33,7 @@ public class MyNettyServerInitializer extends ChannelInitializer<SocketChannel> 
          */
         // 客户端连接地址为 ws://localhost:8000/ws
 //        pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
-        // 目前暂定 字符串编解码，后续改为自定义编解码器解决粘包拆包问题
+
 
         // 添加 LineBasedFrameDecoder 以解决粘包和拆包问题
         pipeline.addLast(new WebSocketMessageEncoder());
