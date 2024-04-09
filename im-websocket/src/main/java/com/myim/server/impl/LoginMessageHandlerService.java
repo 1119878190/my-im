@@ -17,6 +17,7 @@ import io.netty.util.AttributeKey;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import static com.myim.common.constant.RedisKeyConstant.USER_SESSION_CONSTANT;
@@ -35,6 +36,8 @@ public class LoginMessageHandlerService implements MessageHandlerService {
     private Redisson redisson;
     @Autowired
     private NacosDiscoveryProperties nacosDiscoveryProperties;
+    @Value("${websocket.brokerId}")
+    private String brokerId;
 
     /**
      *
@@ -70,8 +73,7 @@ public class LoginMessageHandlerService implements MessageHandlerService {
         userSession.setAppId(msg.getMessageHeader().getAppId());
         userSession.setClientType(msg.getMessageHeader().getClientType());
         userSession.setConnectState(ImConnectStatusEnum.ONLINE_STATUS.getCode());
-        // todo 需要获取nacos 上当前注册的服务的brokerId ,可以将brokerId 写到配置文件中
-        userSession.setBrokerId("");
+        userSession.setBrokerId(brokerId); // 集群下区分不同的机器
         userSession.setImei(msg.getMessageHeader().getImei());
         String hostAddress = nacosDiscoveryProperties.getIp();
         userSession.setBrokerHost(hostAddress);
