@@ -9,6 +9,7 @@ import com.myim.proto.Message;
 import com.myim.proto.MessageHeader;
 import com.myim.proto.MessagePack;
 import com.myim.server.MessageHandlerService;
+import com.myim.util.SpringContextHolder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -157,7 +158,7 @@ public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
         }
 
         // 获取消息处理类
-        MessageHandlerServiceFactory factory = new MessageHandlerServiceFactory();
+        MessageHandlerServiceFactory factory = SpringContextHolder.getBean("messageHandlerServiceFactory");
         MessageHandlerService messageHandler = factory.getMessageHandler(commandEnum);
         messageHandler.messageReceiveHandler(ctx, msg);
 
