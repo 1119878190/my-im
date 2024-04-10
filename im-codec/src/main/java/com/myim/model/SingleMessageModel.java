@@ -29,7 +29,7 @@ public class SingleMessageModel {
     /**
      * 消息id  保证局部唯一(单聊消息AB两人局部唯一递增 ，可通过redis incr 实现)
      */
-    private String messageId;
+    private String messageSequence;
 
     /**
      * 消息类型

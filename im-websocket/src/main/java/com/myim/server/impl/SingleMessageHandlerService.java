@@ -48,7 +48,7 @@ public class SingleMessageHandlerService implements MessageHandlerService {
         singleMessageModel.setSendTime(new Date());
 
         // todo 消息投递到业务服务mq的queue中
-        rocketMQTemplate.asyncSend(IM_2_BUSINESS_P2P_TOPIC, JSONObject.toJSONString(singleMessageModel), new SendCallback() {
+        rocketMQTemplate.asyncSend(IM_2_BUSINESS_P2P_TOPIC, JSONObject.toJSONString(msg), new SendCallback() {
             @Override
             public void onSuccess(SendResult sendResult) {
                 System.out.println("消息发送成功");

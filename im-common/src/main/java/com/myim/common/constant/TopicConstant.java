@@ -14,4 +14,6 @@ public class TopicConstant {
      */
     public static final String IM_2_BUSINESS_P2P_TOPIC = "IM_2_BUSINESS_P2P_TOPIC";
 
+    public static final String  BUSINESS_2_IM_P2P_TOPIC = "BUSINESS_2_IM_P2P_TOPIC";
+
 }
