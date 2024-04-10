@@ -1,10 +1,10 @@
 package com.myim.factory;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import com.myim.common.enums.CommandEnum;
-import com.myim.server.impl.LoginMessageHandlerService;
 import com.myim.server.MessageHandlerService;
+import com.myim.server.impl.LoginMessageHandlerService;
 import com.myim.server.impl.SingleMessageHandlerService;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
@@ -12,6 +12,7 @@ import javax.annotation.Resource;
  * @author lx
  * @date 2024/03/29
  */
+@Component
 public class MessageHandlerServiceFactory {
 
     @Resource

@@ -24,7 +24,7 @@
             <textarea id="messageContent" class="form-control" rows="5" placeholder="Enter message content..."></textarea>
         </div>
         <div class="col">
-            <button onclick="sendMessage(10001)" class="btn btn-success">Send Message</button>
+            <button onclick="sendMessage(10000)" class="btn btn-success">Send Message</button>
             <div class="input-group mt-2">
                 <input type="text" id="loginAccount" class="form-control" placeholder="Enter Login Account...">
                 <div class="input-group-append">
@@ -33,6 +33,17 @@
             </div>
         </div>
     </div>
+    <!-- 新添加的单聊消息发送部分 -->
+    <div class="row mt-3">
+<!--        <div class="col">-->
+<!--            <textarea id="singleChatContent" class="form-control" rows="5" placeholder="Enter single chat message content..."></textarea>-->
+<!--        </div>-->
+        <div class="col">
+            <input type="text" id="singleChatUserId" class="form-control" placeholder="Enter User ID...">
+            <button onclick="sendMessage(10001)" class="btn btn-warning">Send Single Chat Message</button>
+        </div>
+    </div>
+
     <div class="row mt-3">
         <div class="col">
             <h3>Message Sending History:</h3>
@@ -119,7 +130,10 @@
         if (command === 10000) {
             content = JSON.stringify({ "account": $("#loginAccount").val() });
         } else if (command === 10001) {
-            content = JSON.stringify({ "message": $("#messageContent").val(), "from": "your_user_id" });
+            // 构建单聊消息内容，包括用户输入的消息和接收消息的用户ID
+            content = JSON.stringify({ "messageContent": $("#messageContent").val(), "toUserId": $("#singleChatUserId").val() , "fromUserId": $("#loginAccount").val()});
+        }else if (command === 10002){
+
         } else {
             console.error('Invalid command.');
             alert('Invalid command.');
