@@ -7,6 +7,7 @@ import com.myim.model.SingleMessageModel;
 import com.myim.model.UserSession;
 import com.myim.proto.Message;
 import com.myim.proto.MessageHeader;
+import com.myim.proto.MessagePack;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.rocketmq.client.producer.SendCallback;
@@ -59,12 +60,15 @@ public class SingleMessageListener implements RocketMQListener<MessageExt> {
         Object messagePack = message.getMessagePack();
         SingleMessageModel singleMessageModel = JSONObject.parseObject(JSONObject.toJSONString(messagePack), SingleMessageModel.class);
         String fromUserId = singleMessageModel.getFromUserId();
-        String toUserId = singleMessageModel.getToUserId();
 
-        singleMessageModel.setAppId(messageHeader.getAppId());
-        singleMessageModel.setClientType(messageHeader.getClientType());
-        singleMessageModel.setClientType(messageHeader.getClientType());
-        singleMessageModel.setImei(messageHeader.getImei());
+        MessagePack<SingleMessageModel> objectMessagePack = new MessagePack<>();
+        objectMessagePack.setUserId(singleMessageModel.getFromUserId());
+        objectMessagePack.setAppId(messageHeader.getAppId());
+        objectMessagePack.setToId(singleMessageModel.getToUserId());
+        objectMessagePack.setClientType(messageHeader.getClientType());
+        objectMessagePack.setCommand(messageHeader.getCommand());
+        objectMessagePack.setImei(messageHeader.getImei());
+        objectMessagePack.setData(singleMessageModel);
 
         // todo 消息持久化
 
@@ -81,7 +85,7 @@ public class SingleMessageListener implements RocketMQListener<MessageExt> {
             for (UserSession userSession : userAllOnlineSession) {
 
                 rocketMQTemplate.asyncSend(BUSINESS_2_IM_P2P_TOPIC + ":" + userSession.getBrokerId(),
-                        JSONObject.toJSONString(singleMessageModel), new SendCallback() {
+                        JSONObject.toJSONString(objectMessagePack), new SendCallback() {
                             @Override
                             public void onSuccess(SendResult sendResult) {
                                 System.out.println("消息发送成功");
