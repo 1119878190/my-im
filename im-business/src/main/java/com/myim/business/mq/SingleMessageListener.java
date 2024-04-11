@@ -61,6 +61,11 @@ public class SingleMessageListener implements RocketMQListener<MessageExt> {
         String fromUserId = singleMessageModel.getFromUserId();
         String toUserId = singleMessageModel.getToUserId();
 
+        singleMessageModel.setAppId(messageHeader.getAppId());
+        singleMessageModel.setClientType(messageHeader.getClientType());
+        singleMessageModel.setClientType(messageHeader.getClientType());
+        singleMessageModel.setImei(messageHeader.getImei());
+
         // todo 消息持久化
 
 
@@ -75,16 +80,16 @@ public class SingleMessageListener implements RocketMQListener<MessageExt> {
         if (CollectionUtils.isNotEmpty(userAllOnlineSession)) {
             for (UserSession userSession : userAllOnlineSession) {
 
-                rocketMQTemplate.asyncSend(userSession.getBrokerId() + "_" + BUSINESS_2_IM_P2P_TOPIC,
+                rocketMQTemplate.asyncSend(BUSINESS_2_IM_P2P_TOPIC + ":" + userSession.getBrokerId(),
                         JSONObject.toJSONString(singleMessageModel), new SendCallback() {
                             @Override
                             public void onSuccess(SendResult sendResult) {
-
+                                System.out.println("消息发送成功");
                             }
 
                             @Override
                             public void onException(Throwable throwable) {
-
+                                System.out.println("消息发送失败");
                             }
                         });
 

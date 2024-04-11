@@ -36,6 +36,7 @@ public class MyNettyServerHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         ctx.fireChannelActive();
+        System.out.println(ctx.channel().id());
         System.out.println("channel 连接激活");
     }
 

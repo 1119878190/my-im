@@ -48,4 +48,10 @@ public class SingleMessageModel {
 
     private String messageContent;
 
+    private Integer appId;
+
+    private Integer clientType;
+
+    private String imei;
+
 }
